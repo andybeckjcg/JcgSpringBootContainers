@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,6 +20,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 @Controller
 @RequestMapping("/stream")
 public class StreamController {
+
+	private static Logger logger = LoggerFactory.getLogger(StreamController.class);
 
 	private SseEmitter sseEmitter;
 
@@ -92,7 +96,7 @@ public class StreamController {
 		for (int i = 0; i < 3; i++) {
 			AsyncThread at = new AsyncThread();
 			at.setEmitter(sseEmitter);
-			at.setSleep((6-(i*2))*1000);
+			at.setSleep((6 - (i * 2)) * 1000);
 			at.setMessageId(i);
 			at.start();
 		}
@@ -102,6 +106,7 @@ public class StreamController {
 		private SseEmitter sseEmitter;
 		private int sleep;
 		private int id;
+
 		public void setEmitter(SseEmitter sseEmitter) {
 			this.sseEmitter = sseEmitter;
 		}
@@ -109,22 +114,22 @@ public class StreamController {
 		public void setSleep(int sleep) {
 			this.sleep = sleep;
 		}
-		
+
 		public void setMessageId(int id) {
 			this.id = id;
 		}
+
 		public void run() {
 			try {
 				try {
 					Thread.sleep(this.sleep);
-					System.out.println("Timestamp:" + SimpleDateFormat.getDateTimeInstance().format(new Date().getTime()));
+					logger.info("Timestamp:" + SimpleDateFormat.getDateTimeInstance().format(new Date().getTime()));
 					this.sseEmitter.send("Message " + this.id);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.getMessage());
 			}
 		}
 	}
